@@ -1,0 +1,48 @@
+name: Cleanup Multiple Team Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout images repo (teams-imgs branch)
+        uses: actions/checkout@v3
+        with:
+          repository: dev-malikweb/images
+          ref: teams-imgs
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run cleanup script for teams
+        run: |
+          echo "Cleaning up team images..."
+          # هنا تحط سكربت التنظيف
+
+      - name: Commit and push changes for teams
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Cleaned up team images" || echo "No changes"
+          git push origin teams-imgs
+
+      - name: Checkout images repo (national-teams-imgs branch)
+        uses: actions/checkout@v3
+        with:
+          repository: dev-malikweb/images
+          ref: national-teams-imgs
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run cleanup script for national teams
+        run: |
+          echo "Cleaning up national team images..."
+          # هنا تحط سكربت التنظيف
+
+      - name: Commit and push changes for national teams
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Cleaned up national team images" || echo "No changes"
+          git push origin national-teams-imgs
