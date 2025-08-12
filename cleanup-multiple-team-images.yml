@@ -1,44 +1,48 @@
-name: Cleanup Duplicate Team Images Across Folders
+name: Cleanup Multiple Team Images
 
 on:
-  push:
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout images repo (teams-imgs branch)
+        uses: actions/checkout@v3
+        with:
+          repository: dev-malikweb/images
+          ref: teams-imgs
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: حذف الصور المكررة من مجلدات الفرق
+      - name: Run cleanup script for teams
         run: |
-          for dir in teams-imgs national-teams-imgs; do
-            if [[ -d "$dir" ]]; then
-              echo "🧹 تنظيف المجلد: $dir"
-              cd "$dir"
-              for file in *; do
-                if [[ -f "$file" ]]; then
-                  id=$(echo "$file" | sed -E 's/^([0-9]+).*$/\1/')
-                  original="$id.${file##*.}"
-                  if [[ "$file" != "$original" && -f "$original" ]]; then
-                    echo "🗑 حذف: $file (المجلد: $dir، الأصل: $original)"
-                    rm "$file"
-                  fi
-                fi
-              done
-              cd ..
-            else
-              echo "⚠️ المجلد غير موجود: $dir"
-            fi
-          done
+          echo "Cleaning up team images..."
+          # هنا تحط سكربت التنظيف
 
-      - name: حفظ التغييرات
+      - name: Commit and push changes for teams
         run: |
-          git config --global user.name "github-actions"
+          git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "حذف الصور المكررة حسب المعرف من مجلدات الفرق" || echo "لا تغييرات للحفظ"
-          git push
+          git commit -m "Cleaned up team images" || echo "No changes"
+          git push origin teams-imgs
+
+      - name: Checkout images repo (national-teams-imgs branch)
+        uses: actions/checkout@v3
+        with:
+          repository: dev-malikweb/images
+          ref: national-teams-imgs
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run cleanup script for national teams
+        run: |
+          echo "Cleaning up national team images..."
+          # هنا تحط سكربت التنظيف
+
+      - name: Commit and push changes for national teams
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Cleaned up national team images" || echo "No changes"
+          git push origin national-teams-imgs
